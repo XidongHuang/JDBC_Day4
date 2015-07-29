@@ -1,7 +1,8 @@
 package tony.java.jdbc;
 
-
 import java.lang.Thread;
+import java.beans.PropertyVetoException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLClientInfoException;
@@ -12,6 +13,7 @@ import org.apache.commons.dbcp.BasicDataSourceFactory;
 import org.junit.Test;
 import org.omg.CORBA.Current;
 
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mysql.jdbc.interceptors.ServerStatusDiffInterceptor;
 
 import java.sql.PreparedStatement;
@@ -21,19 +23,69 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-
-
 public class JDBCTest {
 	static int count = 0;
+	
+	@Test
+	public void testJDBCTools() throws ClassNotFoundException, IOException, SQLException{
+		Connection connection = JDBCTools.getConnection();
+		
+		System.out.println(connection);
+		
+	}
+	
+	
 
 	/**
-	 * 1. 加载dbcp 的properties 配置文件: 配置文件中的键需要来自BasicDataSource的属性
-	 * 2. 调用 BasicDataSourceFactory 的createDataSrouce 方法创建DataSourceFactory
-	 * 的实例
+	 * 1. 创建c3p0-config.xml 文件，参考帮助文档中Appendix B：Configuation F
+	 * 2. 创建 ComboPooledDataSource 实例:
+	 * DataSource dataSource = new ComboPooledDataSource("helloc3p0");
 	 * 3. 从DataSource 实例中获取数据库链接
+	 * 
+	 * @throws SQLException
+	 */
+	@Test
+	public void testC3P0WithConfigFile() throws SQLException{
+		DataSource dataSource = new ComboPooledDataSource("helloc3p0");
+		System.out.println(dataSource.getConnection());
+		
+		ComboPooledDataSource comboPooledDataSource = (ComboPooledDataSource) dataSource;
+		System.out.println(comboPooledDataSource.getMaxStatements());
+	
+	}
+	
+	
+	
+	
+	/**
+	 * @throws PropertyVetoException
+	 * @throws SQLException 
+	 * 
+	 * 
+	 */
+	@Test
+	public void testC3P0() throws PropertyVetoException, SQLException {
+
+		ComboPooledDataSource cpds = new ComboPooledDataSource();
+		cpds.setDriverClass("com.mysql.jdbc.Driver"); // loads the jdbc driver
+		cpds.setJdbcUrl("jdbc:mysql://testdb.c9xqmbjdijez.us-west-2.rds.amazonaws.com:3306/testDB");
+		cpds.setUser("root");
+		cpds.setPassword("12345678");
+		
+		System.out.println(cpds.getConnection());
+		
+	
+
+	}
+
+	/**
+	 * 1. 加载dbcp 的properties 配置文件: 配置文件中的键需要来自BasicDataSource的属性 2. 调用
+	 * BasicDataSourceFactory 的createDataSrouce 方法创建DataSourceFactory 的实例 3.
+	 * 从DataSource 实例中获取数据库链接
+	 * 
 	 * @throws Exception
 	 */
-	
+
 	@Test
 	public void testDBCPWithDataSourceFactory() throws Exception {
 
@@ -44,9 +96,9 @@ public class JDBCTest {
 		DataSource dataSource = BasicDataSourceFactory.createDataSource(properties);
 		System.out.println(dataSource.getConnection());
 
-		BasicDataSource basicDataSource = (BasicDataSource)dataSource;
+		BasicDataSource basicDataSource = (BasicDataSource) dataSource;
 		System.out.println(basicDataSource.getMaxWait());
-		
+
 	}
 
 	/**
@@ -60,7 +112,7 @@ public class JDBCTest {
 	public void testDBCP() throws SQLException {
 
 		// 创建 DBCP 数据源实例
-	
+
 		final BasicDataSource dataSource = new BasicDataSource();
 
 		// 2. 为数据源实例制定必须的属性
@@ -88,18 +140,18 @@ public class JDBCTest {
 
 		connection = dataSource.getConnection();
 		System.out.println(connection.getClass());
-		
+
 		connection = dataSource.getConnection();
 		System.out.println(connection.getClass());
-		
+
 		connection = dataSource.getConnection();
 		System.out.println(connection.getClass());
-		
+
 		Connection connection2 = dataSource.getConnection();
-		System.out.println(">"+connection.getClass());
-		
-		new Thread(){
-			public void run(){
+		System.out.println(">" + connection.getClass());
+
+		new Thread() {
+			public void run() {
 				try {
 					Connection conn = dataSource.getConnection();
 					System.out.println(conn.getClass());
@@ -108,10 +160,9 @@ public class JDBCTest {
 					e.printStackTrace();
 				}
 			};
-			
-			
+
 		}.start();
-		
+
 		try {
 			Thread.sleep(3000);
 		} catch (InterruptedException e) {

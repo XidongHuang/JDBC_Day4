@@ -10,6 +10,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
+import javax.sql.DataSource;
+
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+
 public class JDBCTools {
 
 	// 处理数据库事务
@@ -122,6 +126,8 @@ public class JDBCTools {
 
 		if (connection != null) {
 			try {
+				//数据库连接池的Connection 对象进行 close时
+				//并不是真的进行关闭，而是把该数据库链接会归还到数据库连接池中
 				connection.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -130,21 +136,17 @@ public class JDBCTools {
 
 	}
 
+	private static DataSource dataSource = null;
+	
+	//数据库连接池应该只被初始化一次
+	static {
+		dataSource = new ComboPooledDataSource("helloc3p0");
+	}
+	
+	
 	public static Connection getConnection() throws IOException, ClassNotFoundException, SQLException {
 
-		Properties properties = new Properties();
-		InputStream inStream = JDBCTools.class.getClassLoader().getResourceAsStream("jdbc.properties");
-		properties.load(inStream);
-
-		String user = properties.getProperty("user");
-		String password = properties.getProperty("password");
-		String jdbcUrl = properties.getProperty("jdbcUrl");
-		String driverClass = properties.getProperty("driver");
-
-		Class.forName(driverClass);
-
-		Connection connection = DriverManager.getConnection(jdbcUrl, user, password);
-		return connection;
+		return dataSource.getConnection();
 	}
 
 }
