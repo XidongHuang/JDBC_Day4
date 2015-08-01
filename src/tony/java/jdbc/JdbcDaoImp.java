@@ -2,10 +2,16 @@ package tony.java.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
+
+import com.mysql.jdbc.PreparedStatement;
 
 
 
@@ -31,20 +37,29 @@ public class JdbcDaoImp<T> implements DAO<T> {
 	
 	@Override
 	public void batch(Connection connection, String sql, Object[]... args) {
-		// TODO Auto-generated method stub
+	
+		try {
+			queryRunner.batch(connection,sql, args);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 
 	@Override
-	public <E> E getForValue(Connection connection, String sql, Object... args) {
-		// TODO Auto-generated method stub
-		return null;
+	public <E> E getForValue(Connection connection, String sql, Object... args) throws SQLException {
+
+		
+		return (E) queryRunner.query(connection, sql, new ScalarHandler(),args);
 	}
 
 	@Override
-	public List<T> getForList(Connection connection, String sql, Object... args) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Map<String, Object>> getForList(Connection connection, String sql, Object... args) throws SQLException {
+
+		
+		
+		return queryRunner.query(connection, sql, new MapListHandler(),args);
 	}
 
 	@Override
@@ -57,9 +72,9 @@ public class JdbcDaoImp<T> implements DAO<T> {
 	}
 
 	@Override
-	public void update(Connection connection, String sql, Object... args) {
+	public void update(Connection connection, String sql, Object... args) throws SQLException {
 		// TODO Auto-generated method stub
-		
+		queryRunner.update(connection, sql,args);
 	}
 
 }

@@ -1,6 +1,7 @@
 package tony.java.jdbc;
 
 import java.util.List;
+import java.util.Map;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -30,9 +31,10 @@ public interface DAO<T> {
 	 * @param sql
 	 * @param args
 	 * @return
+	 * @throws SQLException 
 	 */
 	<E> E getForValue(Connection connection, String sql,
-			Object ... args);
+			Object ... args) throws SQLException;
 	
 	
 	/**
@@ -41,9 +43,10 @@ public interface DAO<T> {
 	 * @param sql
 	 * @param args
 	 * @return
+	 * @throws SQLException 
 	 */
-	List<T> getForList(Connection connection, String sql,
-			Object ... args);
+	List<Map<String, Object>> getForList(Connection connection, String sql,
+			Object ... args) throws SQLException;
 	
 	/**
 	 * 返回一个 T 的对象
@@ -62,10 +65,11 @@ public interface DAO<T> {
 	 * @param connection
 	 * @param sql
 	 * @param args
+	 * @throws SQLException 
 	 */
 	
 	void update(Connection connection, String sql,
-			Object ... args);
+			Object ... args) throws Exception;
 	
 	
 	
